@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserWallet {
+  id                          String   @id @default(uuid())
+  walletAddress               String   @unique
+  chain                       String   @default("solana")
+  msgPubKeyBase64             String?
+  msgKeyBindingSignatureBase64 String?
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+
+  @@map("user_wallets")
+}
+
+model Thread {
+  id            String    @id @default(uuid())
+  participantA  String    // walletAddress (alphabetically first)
+  participantB  String    // walletAddress (alphabetically second)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastMessageAt DateTime?
+
+  messages    Message[]
+  states      ThreadState[]
+
+  @@unique([participantA, participantB])
+  @@index([participantA])
+  @@index([participantB])
+  @@map("threads")
+}
+
+model Message {
+  id               String   @id @default(uuid())
+  threadId         String
+  fromWallet       String
+  toWallet         String
+  nonceBase64      String
+  ciphertextBase64 String
+  createdAt        DateTime @default(now())
+
+  thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
+  @@map("messages")
+}
+
+model ThreadState {
+  id            String   @id @default(uuid())
+  threadId      String
+  walletAddress String
+  lastReadAt    DateTime @default(now())
+  isAccepted    Boolean  @default(false)
+  isBlocked     Boolean  @default(false)
+
+  thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@unique([threadId, walletAddress])
+  @@index([walletAddress])
+  @@map("thread_states")
+}
+
+model Report {
+  id              String   @id @default(uuid())
+  reporterWallet  String
+  reportedWallet  String
+  reason          String?
+  createdAt       DateTime @default(now())
+
+  @@map("reports")
+}
+
+model AuthChallenge {
+  id            String   @id @default(uuid())
+  walletAddress String
+  nonce         String   @unique
+  expiresAt     DateTime
+  used          Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  @@index([walletAddress])
+  @@map("auth_challenges")
+}

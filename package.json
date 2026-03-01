@@ -1,0 +1,34 @@
+{
+  "name": "walletwhisper",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Wallet-to-wallet encrypted chat for trading terminals",
+  "scripts": {
+    "dev": "pnpm run --parallel dev",
+    "dev:server": "pnpm --filter @walletwhisper/server dev",
+    "dev:ext": "pnpm --filter @walletwhisper/extension dev",
+    "build": "pnpm run --parallel build",
+    "build:shared": "pnpm --filter @walletwhisper/shared build",
+    "build:server": "pnpm --filter @walletwhisper/server build",
+    "build:ext": "pnpm --filter @walletwhisper/extension build",
+    "test": "pnpm run --parallel test",
+    "test:server": "pnpm --filter @walletwhisper/server test",
+    "test:shared": "pnpm --filter @walletwhisper/shared test",
+    "db:up": "docker compose -f infra/docker-compose.yml up -d",
+    "db:down": "docker compose -f infra/docker-compose.yml down",
+    "db:migrate": "pnpm --filter @walletwhisper/server prisma:migrate",
+    "db:generate": "pnpm --filter @walletwhisper/server prisma:generate",
+    "lint": "pnpm run --parallel lint"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "esbuild",
+      "prisma"
+    ]
+  }
+}
